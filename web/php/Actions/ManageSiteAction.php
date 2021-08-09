@@ -11,8 +11,8 @@ use Wikidot\DB\CategoryPeer;
 use Wikidot\DB\PagePeer;
 use Wikidot\DB\ThemePeer;
 use Wikidot\DB\Theme;
-use Wikidot\DB\SiteTagPeer;
-use Wikidot\DB\SiteTag;
+use Wikidot\DB\AllowedTagsPeer;
+use Wikidot\DB\AllowedTags;
 use Wikidot\DB\SitePeer;
 use Wikidot\DB\DomainRedirectPeer;
 use Wikidot\DB\DomainRedirect;
@@ -440,6 +440,7 @@ class ManageSiteAction extends SmartyAction
         $subtitle = trim($pl->getParameterValue("subtitle"));
 
         $description = trim($pl->getParameterValue("description"));
+        $enableAllowedTags = trim($pl->getParameterValue("enableAllowedTags"));
         $tags = strtolower(trim($pl->getParameterValue("tags")));
 
         $defaultPage = WDStringUtils::toUnixName($pl->getParameterValue("default_page"));
@@ -456,9 +457,6 @@ class ManageSiteAction extends SmartyAction
         }
         if (strlen8($description)>300) {
             $errors['description']   = _("Description should not be longer than 300 characters");
-        }
-        if (strlen8($tags)>128) {
-            $errors['tags']  = _('"Tags" field too long.');
         }
 
         if ($defaultPage == "") {
@@ -492,6 +490,11 @@ class ManageSiteAction extends SmartyAction
             $changed = true;
         }
 
+        if ($site->getEnableAllowedTags() !== $enableAllowedTags) {
+            $site->setEnableAllowedTags($enableAllowedTags);
+            $changed = true;
+        }
+
         $db = Database::connection();
         $db->begin();
 
@@ -505,7 +508,7 @@ class ManageSiteAction extends SmartyAction
         $c = new Criteria();
         $c->add("site_id", $site->getSiteId());
 
-        $dbTags = SiteTagPeer::instance()->select($c);
+        $dbTags = AllowedTagsPeer::instance()->select($c);
         $tags = preg_split("/[ ,]+/", $tags);
         $tags = array_unique($tags);
 
@@ -513,13 +516,13 @@ class ManageSiteAction extends SmartyAction
             if (in_array($dbTag->getTag(), $tags)) {
                 unset($tags[array_search($dbTag->getTag(), $tags)]);
             } else {
-                SiteTagPeer::instance()->deleteByPrimaryKey($dbTag->getTagId());
+                AllowedTagsPeer::instance()->deleteByPrimaryKey($dbTag->getTagId());
             }
         }
         // insert all other
         foreach ($tags as $tag) {
             if (trim($tag) != '') {
-                $dbTag = new SiteTag();
+                $dbTag = new AllowedTags();
                 $dbTag->setSiteId($site->getSiteId());
                 $dbTag->setTag($tag);
                 $dbTag->save();
