@@ -1427,6 +1427,17 @@ class WikiPageAction extends SmartyAction
             }
         }
 
+        $tagsArray = explode(' ', $tags);
+        $siteId = $site->getSiteId();
+        $taglist = SiteTag::getSiteTags($siteId);
+        $taglist = explode(' ', $taglist);
+
+        foreach ($tagsArray as $tag) {
+            if(!in_array($tag, $taglist)) {
+                throw new ProcessException(_('Invalid tags.'), "form_error");
+            }
+        }
+
         $db = Database::connection();
         $db->begin();
 
