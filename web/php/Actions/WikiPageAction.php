@@ -1403,7 +1403,7 @@ class WikiPageAction extends SmartyAction
         $site = $runData->getTemp("site");
         $siteId = $site->getSiteId();
         $enableAllowedTags = DB::table('site')->where('site_id', $siteId)->value('enable_allowed_tags');
-        
+
         $page = PagePeer::instance()->selectByPrimaryKey($pageId);
 
         if ($page == null || $page->getSiteId() != $site->getSiteId()) {
@@ -1417,9 +1417,8 @@ class WikiPageAction extends SmartyAction
         $pageTagsArray = explode(' ', $tags);
 
         $allowedTagsList = AllowedTags::getAllowedTags($siteId);
-        $allowedTagsList = explode(' ', $allowedTagsList);
 
-       if($enableAllowedTags == true) {
+       if($enableAllowedTags == true && !empty($tags)) {
             foreach ($pageTagsArray as $tag) {
                 if(!in_array($tag, $allowedTagsList)) {
                     throw new ProcessException(_("$tag is not a valid tag for this site."), "form_error");
