@@ -86,8 +86,7 @@ class TagConfiguration
 
         // Check tag group condition lists
         foreach ($this->tag_groups as $tag_group => $data) {
-            // TODO figure out tag group condition
-            if (true) {
+            if (!$this->tagGroupPresent($tag_group, $tags)->isEmpty()) {
                 foreach ($data['condition_lists'] as $condition_list_data) {
                     $condition_list = new TagConditionList($condition_list_data);
                     if (!$condition_list->validate($tags)) {
@@ -101,14 +100,24 @@ class TagConfiguration
         return true;
     }
 
-    // Accessors
+    // Tag group helpers
     public function tagGroupMembers(string $name): Set
     {
         return $this->tag_groups[$name]['members'];
     }
 
-    public function tagGroupAbsent(string $name, Set $tags): Set
+    public function tagGroupPresent(string $name, Set $tags): Set
     {
-        return $this->tagGroupMembers($name).diff($tags);
+        return $this->tagGroupMembers($name)->intersect($tags);
+    }
+
+    public function tagGroupFullyPresent(string $name, Set $tags): bool
+    {
+        return $this->tagGroupMembers($name)->diff($tags)->isEmpty();
+    }
+
+    public function tagGroupFullyAbsent(string $name, Set $tags): bool
+    {
+        return $this->tagGroupPresent($name, $tags)->isEmpty();
     }
 }

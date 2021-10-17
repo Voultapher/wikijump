@@ -22,7 +22,7 @@ class TagConditionList
      *   'conditions' => [
      *     one or more:
      *     [
-     *       'type' => 'tag-is-present' | 'tag-is-absent' | 'tag-group-is-present' | 'tag-group-is-absent' | 'tag-group-custom',
+     *       'type' => 'tag-is-present' | 'tag-is-absent' | 'tag-group-is-fully-present' | 'tag-group-is-fully-absent' | 'tag-group-custom',
      *       if 'tag-group-custom' only:
      *       'compare' => 'gte' | 'gt' | 'lte' | 'lt' | 'eq' | 'neq',
      *       'value' => integer,
@@ -73,27 +73,13 @@ class TagConditionList
                 return $tags->contains($name);
             case 'tag-is-absent':
                 return !$tags->contains($name);
-            case 'tag-group-is-present':
-            case 'tag-group-is-absent':
+            case 'tag-group-is-fully-present':
+                return $this->config->tagGroupFullyPresent($name, $tags);
+            case 'tag-group-is-fully-absent':
+                return $this->config->tagGroupFullyAbsent($name, $tags);
             case 'tag-group-custom':
-                return $this->validateGroupCondition($type, $name, $condition, $tags);
-            default:
-                throw new Exception("Unknown condition type: $type");
-        }
-    }
-
-    private function validateGroupCondition(string $type, string $name, array $condition, Set $tags): bool
-    {
-        $absent = count($this->config->tagGroupAbsent($name, $tags));
-        $total = count($this->config->tagGroupMembers($name));
-
-        switch ($type) {
-            case 'tag-group-is-present':
-                return $absent === 0;
-            case 'tag-group-is-absent';
-                return $absent === $total;
-            case 'tag-group-custom':
-                return $this->checkCustomRequirement($condition, $absent);
+                $present = count($this->config->tagGroupPresent($name, $tags));
+                return $this->checkCustomRequirement($condition, $present);
             default:
                 throw new Exception("Unknown condition type: $type");
         }
