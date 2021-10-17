@@ -74,11 +74,26 @@ class TagConditionList
             case 'tag-is-absent':
                 return !$tags->contains($name);
             case 'tag-group-is-present':
-                // TODO
             case 'tag-group-is-absent':
-                // TODO
             case 'tag-group-custom':
-                // TODO
+                return $this->validateGroupCondition($type, $name, $condition, $tags);
+            default:
+                throw new Exception("Unknown condition type: $type");
+        }
+    }
+
+    private function validateGroupCondition(string $type, string $name, array $condition, Set $tags): bool
+    {
+        $absent = count($this->config->tagGroupAbsent($name, $tags));
+        $total = count($this->config->tagGroupMembers($name));
+
+        switch ($type) {
+            case 'tag-group-is-present':
+                return $absent === 0;
+            case 'tag-group-is-absent';
+                return $absent === $total;
+            case 'tag-group-custom':
+                return $this->checkCustomRequirement($condition, $absent);
             default:
                 throw new Exception("Unknown condition type: $type");
         }

@@ -56,11 +56,25 @@ class TagConfiguration
         }
     }
 
+    /**
+     * Exposes a view of this class that is suitable for serializing into JSON.
+     * @return array
+     */
     public function toJson(): array
     {
         return [
             'tags' => $this->tags,
             'tag_groups' => $this->tag_groups,
         ];
+    }
+
+    public function tagGroupMembers(string $name): Set
+    {
+        return $this->tag_groups[$name]['members'];
+    }
+
+    public function tagGroupAbsent(string $name, Set $tags): Set
+    {
+        return $this->tagGroupMembers($name).diff($tags);
     }
 }
