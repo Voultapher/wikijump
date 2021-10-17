@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Wikijump\Services\TagEngine;
 
+use Carbon\Carbon;
 use Ds\Set;
 
 class TagConfiguration
@@ -70,7 +71,30 @@ class TagConfiguration
     }
 
     // Validation
-    public function validate(Set $tags): bool
+    public function validateTags(Set $added_tags, Set $removed_tags, Set $role_ids, Carbon $date): bool
+    {
+        // If empty, it means don't validate on tag existence
+        if (empty($this->tags)) {
+            return true;
+        }
+
+        // Check all added and removed tags
+        foreach ($added_tags as $tag) {
+            if (!$this->canChangeTag($tag, $date, $role_ids)) {
+                return false;
+            }
+        }
+
+        foreach ($removed_tags as $tag) {
+            if (!$this->canChangeTag($tag, $date, $role_ids)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function validateConditions(Set $tags): bool
     {
         // Check tag condition lists
         foreach ($this->tags as $tag => $data) {
@@ -97,6 +121,37 @@ class TagConfiguration
         }
 
         // All condition lists passed
+        return true;
+    }
+
+    // Tag helpers
+    private function canChangeTag(string $tag, Set $role_ids, Carbon $date): bool
+    {
+        $tag_data = $this->tags[$tag];
+        if ($tag_data === null) {
+            // No tag entry, not a valid tag
+            return false;
+        }
+
+        // Check role constraint, if present
+        $allowed_role_ids = $tag_data['properties']['role_ids'];
+        if ($allowed_role_ids !== null) {
+            if ($allowed_role_ids->intersect($role_ids)->isEmpty()) {
+                // No roles in common, not allowed to apply
+                return false;
+            }
+        }
+
+        // Check date constraint, if present
+        $date_bound = $tag_data['properties']['date_bound'];
+        if ($date_bound !== null) {
+            [$start_date, $end_date] = $date_bound;
+            if (!$date->between($start_date, $end_date)) {
+                return false;
+            }
+        }
+
+        // All constraints passed
         return true;
     }
 
