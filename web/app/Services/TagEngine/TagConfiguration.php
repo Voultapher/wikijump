@@ -20,7 +20,7 @@ class TagConfiguration
      *       zero or more:
      *       array matching TagConditionList
      *     ],
-     *  ],
+     *   ],
      * ]
      */
     private array $tags;
@@ -40,6 +40,7 @@ class TagConfiguration
      */
     private array $tag_groups;
 
+    // Creation and serialization
     public function __construct(array $data)
     {
         $this->tags = $data->tags ?? [];
@@ -68,6 +69,39 @@ class TagConfiguration
         ];
     }
 
+    // Validation
+    public function validate(Set $tags): bool
+    {
+        // Check tag condition lists
+        foreach ($this->tags as $tag => $data) {
+            if ($tags->contains($tag)) {
+                foreach ($data['condition_lists'] as $condition_list_data) {
+                    $condition_list = new TagConditionList($condition_list_data);
+                    if (!$condition_list->validate($tags)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // Check tag group condition lists
+        foreach ($this->tag_groups as $tag_group => $data) {
+            // TODO figure out tag group condition
+            if (true) {
+                foreach ($data['condition_lists'] as $condition_list_data) {
+                    $condition_list = new TagConditionList($condition_list_data);
+                    if (!$condition_list->validate($tags)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // All condition lists passed
+        return true;
+    }
+
+    // Accessors
     public function tagGroupMembers(string $name): Set
     {
         return $this->tag_groups[$name]['members'];
