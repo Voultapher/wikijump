@@ -10,16 +10,16 @@ class TagConfiguration
      * @var array $tags The rules and definitions concerning tags.
      *
      * Schema: [
-     *   'definitions' => [
-     *     'tag_name' => [
+     *   'tag_name' => [
+     *     'properties' => [
      *        ?'role_ids' => [list of role IDs that can apply this tag],
      *        ?'date_bound' => [start_date, end_date],
      *      ],
-     *    ],
-     *   'condition_lists' => [
-     *     zero or more:
-     *     array matching TagConditionList
-     *   ],
+     *     'condition_lists' => [
+     *       zero or more:
+     *       array matching TagConditionList
+     *     ],
+     *  ],
      * ]
      */
     private array $tags;
@@ -28,12 +28,12 @@ class TagConfiguration
      * @var array $tag_groups The rules and definitions concerning tags.
      *
      * Schema: [
-     *   'definitions' => [
-     *     'group_name' => [list of tag names],
-     *   ],
-     *   'condition_lists' => [
-     *     zero or more:
-     *     array matching TagConditionList
+     *   'group_name' => [
+     *     'members' => [list of tag names],
+     *     'condition_lists' => [
+     *       zero or more:
+     *       array matching TagConditionList
+     *     ],
      *   ],
      * ]
      */
