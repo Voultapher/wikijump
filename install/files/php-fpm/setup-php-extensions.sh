@@ -16,4 +16,4 @@ docker-php-ext-install intl
 
 # Configure PHP Data Structures
 pecl install ds
-
+docker-php-ext-enable ds
