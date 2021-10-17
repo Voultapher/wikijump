@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Wikijump\Helpers;
 
+use Ds\Set;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Ozone\Framework\Database\Criteria;
@@ -245,9 +246,11 @@ final class LegacyTools
             $return['showPageoptions'] = true;
 
             // get the tags
-            $t2 = PagePeer::getTags($pageId);
+            $page_id = $page->getPageId();
+            $t2 = PagePeer::getTags($page_id);
+            $t2 = $t2->toArray();
             $runData->contextAdd("tags", $t2);
-            $return['tags'] = $tags;
+            $return['tags'] = null;
 
             // has discussion?
             if ($page->getThreadId()!== null) {
