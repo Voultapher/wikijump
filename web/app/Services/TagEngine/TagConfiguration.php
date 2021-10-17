@@ -6,17 +6,50 @@ namespace Wikijump\Services\TagEngine;
 
 class TagConfiguration
 {
-    // 'tag_name' => ValidTag
-    public array $valid_tags = [];
+    /**
+     * @var array $tags The rules and definitions concerning tags.
+     *
+     * Schema: [
+     *   'definitions' => [
+     *     'tag_name' => [
+     *        ?'role_ids' => [list of role IDs that can apply this tag],
+     *        ?'date_bound' => [start_date, end_date],
+     *      ],
+     *    ],
+     *   'condition_lists' => [
+     *     zero or more:
+     *     array matching TagConditionList
+     *   ],
+     * ]
+     */
+    private array $tags;
 
-    // 'group_name' => Set['tag_name']
-    public array $tag_groups = [];
+    /**
+     * @var array $tag_groups The rules and definitions concerning tags.
+     *
+     * Schema: [
+     *   'definitions' => [
+     *     'group_name' => [list of tag names],
+     *   ],
+     *   'condition_lists' => [
+     *     zero or more:
+     *     array matching TagConditionList
+     *   ],
+     * ]
+     */
+    private array $tag_groups;
 
-    // Tag condition lists:
-    // 'tag_name' => TagConditionList
-    public array $tag_condition_lists = [];
+    public function __construct(array $data)
+    {
+        $this->tags = $data->tags ?? [];
+        $this->tag_groups = $data->tag_groups ?? [];
+    }
 
-    // Tag group condition lists:
-    // 'group_name' => TagConditionList
-    public array $tag_group_condition_lists = [];
+    public function toJson(): array
+    {
+        return [
+            'tags' => $this->tags,
+            'tag_groups' => $this->tag_groups,
+        ];
+    }
 }
